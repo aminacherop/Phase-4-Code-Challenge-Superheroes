@@ -28,3 +28,31 @@ with app.app_context():
 
     db.session.add_all(heroes + powers)
     db.session.commit()
+
+    
+    hero_powers = [
+        
+        HeroPower(hero_id=1, power_id=2, strength="Strong"),
+        
+        
+        HeroPower(hero_id=1, power_id=4, strength="Average"),  
+        HeroPower(hero_id=2, power_id=1, strength="Strong"),  
+        HeroPower(hero_id=3, power_id=3, strength="Strong"),   
+        HeroPower(hero_id=3, power_id=1, strength="Average"),  
+        HeroPower(hero_id=4, power_id=2, strength="Strong"),   
+        HeroPower(hero_id=5, power_id=1, strength="Strong"),   
+        HeroPower(hero_id=6, power_id=2, strength="Strong"),  
+        HeroPower(hero_id=6, power_id=1, strength="Strong"),   
+        HeroPower(hero_id=7, power_id=3, strength="Strong"),  
+        HeroPower(hero_id=8, power_id=2, strength="Strong"),  
+        HeroPower(hero_id=9, power_id=3, strength="Average"),  
+        HeroPower(hero_id=10, power_id=1, strength="Strong"),  
+    ]
+
+    db.session.add_all(hero_powers)
+    db.session.commit()
+
+    print("Database seeded successfully!")
+    print(f"Created {len(heroes)} heroes")
+    print(f"Created {len(powers)} powers") 
+    print(f"Created {len(hero_powers)} hero-power relationships")

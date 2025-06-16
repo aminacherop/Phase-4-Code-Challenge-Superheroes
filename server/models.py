@@ -12,6 +12,7 @@ class Hero(db.Model, SerializerMixin):
 
     hero_powers = db.relationship('HeroPower', backref='hero', cascade='all, delete-orphan')
 
+    
     serialize_rules = ('-hero_powers.hero',)
 
 
@@ -24,7 +25,7 @@ class Power(db.Model, SerializerMixin):
 
     hero_powers = db.relationship('HeroPower', backref='power', cascade='all, delete-orphan')
 
-    serialize_rules = ('-hero_powers.power',)
+    serialize_rules = ('-hero_powers',)
 
     @validates('description')
     def validate_description(self, key, value):

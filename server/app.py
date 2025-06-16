@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from config import Config
 from models import Hero, Power, HeroPower
 from sqlalchemy.exc import IntegrityError
-from extensions import db,migrate
+from extensions import db, migrate
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -21,14 +21,12 @@ def get_hero(id):
     hero = Hero.query.get(id)
     if not hero:
         return jsonify({"error": "Hero not found"}), 404
-    return jsonify(hero.to_dict(rules=('hero_powers', 'hero_powers.power'))), 200
+    
+    return jsonify(hero.to_dict(rules=('-hero_powers.hero',))), 200
 
 @app.route('/powers', methods=['GET'])
 def get_powers():
     return jsonify([power.to_dict() for power in Power.query.all()]), 200
-
-
-
 
 @app.route('/powers/<int:id>', methods=['GET', 'PATCH'])
 def power_detail(id):
@@ -41,16 +39,42 @@ def power_detail(id):
 
     if request.method == 'PATCH':
         data = request.get_json()
+        
+        
+        if not data or 'description' not in data:
+            return jsonify({"errors": ["Description field is required"]}), 400
+        
         try:
+            
             power.description = data['description']
             db.session.commit()
             return jsonify(power.to_dict()), 200
-        except Exception:
+        except ValueError as e:
+        
+            return jsonify({"errors": [str(e)]}), 400
+        except Exception as e:
+        
+            print(f"Unexpected error: {e}")
             return jsonify({"errors": ["validation errors"]}), 400
 
 @app.route('/hero_powers', methods=['POST'])
 def create_hero_power():
     data = request.get_json()
+    
+    
+    required_fields = ['strength', 'hero_id', 'power_id']
+    if not data or not all(field in data for field in required_fields):
+        return jsonify({"errors": ["Missing required fields"]}), 400
+    
+    
+    hero = Hero.query.get(data['hero_id'])
+    power = Power.query.get(data['power_id'])
+    
+    if not hero:
+        return jsonify({"errors": ["Hero not found"]}), 400
+    if not power:
+        return jsonify({"errors": ["Power not found"]}), 400
+    
     try:
         hero_power = HeroPower(
             strength=data['strength'],
@@ -68,8 +92,12 @@ def create_hero_power():
             "hero": hero_power.hero.to_dict(),
             "power": hero_power.power.to_dict(),
         }), 201
-    except Exception:
+    except ValueError as e:
+        
+        return jsonify({"errors": [str(e)]}), 400
+    except Exception as e:
+        print(f"Unexpected error: {e}")
         return jsonify({"errors": ["validation errors"]}), 400
-    
+
 if __name__ == '__main__':
     app.run(debug=True)
